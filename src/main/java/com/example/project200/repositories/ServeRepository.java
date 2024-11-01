@@ -10,4 +10,6 @@ import java.util.List;
 public interface ServeRepository extends JpaRepository<com.example.project200.entities.Serve, Long> {
     Serve findByName(String name);
     List<Serve> findAllById(Iterable<Long> ids);
+    List<Serve> findServesBySaloonId(Long saloonId);
+
 }

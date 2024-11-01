@@ -3,6 +3,7 @@ package com.example.project200.services;
 import com.example.project200.entities.Barber;
 import com.example.project200.entities.Saloon;
 import com.example.project200.entities.Serve;
+import com.example.project200.handlers.NotFoundException;
 import com.example.project200.repositories.BarberRepository;
 import com.example.project200.repositories.SaloonRepository;
 import com.example.project200.repositories.ServeRepository;
@@ -27,43 +28,40 @@ public class ServeService {
     private final SaloonRepository saloonRepository;
 
     public String addServe(ServeReqDto serveReqDto) {
-
         Serve serve = modelMapper.map(serveReqDto, Serve.class);
 
-        // Retrieve Barber and Saloon from the database
-        Barber barber = barberRepository.findById(serveReqDto.getBarberId()).orElse(null);
-        if (barber == null) {
-            return "Barber not found";
-        }
+        // Retrieve Barber and Saloon, throw exception if not found
+        Barber barber = barberRepository.findById(serveReqDto.getBarberId())
+                .orElseThrow(() -> new NotFoundException("Barber with ID " + serveReqDto.getBarberId() + " not found"));
+        Saloon saloon = saloonRepository.findById(serveReqDto.getSaloonId())
+                .orElseThrow(() -> new NotFoundException("Saloon with ID " + serveReqDto.getSaloonId() + " not found"));
 
-        Saloon saloon = saloonRepository.findById(serveReqDto.getSaloonId()).orElse(null);
-        if (saloon == null) {
-            return "Saloon not found";
-        }
+        // Associate Serve with Saloon and Barber
+        saloon.getBarberServices().add(serve);
+        barber.getBarberServices().add(serve);
 
-        // Set relationships manually
+        saloonRepository.save(saloon);
+        barberRepository.save(barber);
+
+        // Set relationships manually in Serve entity
         serve.setBarber(barber);
         serve.setSaloon(saloon);
 
-        // Save Serve entity
         serveRepository.save(serve);
-
         return "Serve with name " + serveReqDto.getName() + " added";
-
     }
+
     public String updateServe(ServeReqDto serveReqDto, Long id) {
-        Serve saved = serveRepository.findById(id).orElse(null);
-        if (saved == null) {
-            return "Barber service not found";
+        Serve existingServe = serveRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Serve with ID " + id + " not found"));
 
+        // Update fields
+        existingServe.setName(serveReqDto.getName());
+        existingServe.setPrice(serveReqDto.getPrice());
+        existingServe.setRequiredTime(serveReqDto.getRequiredTime());
 
-        }
-        saved.setName(serveReqDto.getName());
-        saved.setPrice(serveReqDto.getPrice());
-        saved.setRequiredTime(serveReqDto.getRequiredTime());
-        serveRepository.save(saved);
-        return "ServeRepository with name " + saved.getName() + " updated";
-
+        serveRepository.save(existingServe);
+        return "Serve with name " + existingServe.getName() + " updated successfully";
     }
 
     public List<ServeResDto> getAllServes() {
@@ -72,27 +70,22 @@ public class ServeService {
                 .map(serve -> modelMapper.map(serve, ServeResDto.class))
                 .collect(Collectors.toList());
     }
-
-    //    public String updateServe(ServeReqDto serveReqDto, Long id) {
-//        ServeRepository serve = serveRepository.findById(id).orElse(null);
-//        ServeRepository updatedServe = modelMapper.map(serveReqDto, ServeRepository.class);
-//        if (serve == null){
-//            return "ServeRepository does not exist";
-//        }
-//        else {
-//            serve.setId(updatedServe.getId());
-//            return "ServeRepository has successfully updated";
-//        }
-//    }
-    public String deleteServe(Long id) {
-        Serve serve = serveRepository.findById(id).orElse(null);
-        if (serve == null) {
-            return "Serve does not exist";
-        } else {
-            serveRepository.delete(serve);
-            return "Serve- has successfully deleted";
-        }
+    public List<ServeResDto> getServesByBarberId(Long id) {
+        return serveRepository.findServesBySaloonId(id)
+                .stream()
+                .map(serve -> modelMapper.map(serve, ServeResDto.class))
+                .collect(Collectors.toList());
     }
+
+
+    public String deleteServe(Long id) {
+        Serve serve = serveRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Serve with ID " + id + " does not exist"));
+
+        serveRepository.delete(serve);
+        return "Serve with name " + serve.getName() + " deleted successfully";
+    }
+}
 
 
 //    public String addServeToBarber(Long idServe, Long idBarber) {
@@ -114,4 +107,4 @@ public class ServeService {
 //    }
 
 
-}
+

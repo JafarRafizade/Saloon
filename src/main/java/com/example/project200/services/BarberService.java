@@ -3,6 +3,8 @@ package com.example.project200.services;
 import com.example.project200.entities.Reservation;
 import com.example.project200.entities.Barber;
 import com.example.project200.entities.Saloon;
+import com.example.project200.handlers.AlreadyExistsException;
+import com.example.project200.handlers.NotFoundException;
 import com.example.project200.repositories.ReservationRepository;
 import com.example.project200.repositories.BarberRepository;
 import com.example.project200.repositories.SaloonRepository;
@@ -74,53 +76,51 @@ public class BarberService {
 
     public String createBarber(BarberReqDto barberReqDto) {
         Barber barber = modelMapper.map(barberReqDto, Barber.class);
-        Saloon saloon = saloonRepository.findById(barberReqDto.getSaloonId()).orElse(null);
-        Barber saved = barberRepository.findById(barber.getId()).orElse(null);
-        if (saved != null) {
-            return "Barber already exists";
-        }
-        else {
 
-            assert saloon != null;
-            List<Barber> barbers = saloon.
-                    getBarbers();
-            barbers.add(barber);
-            saloon.setBarbers(barbers);
-
-            barber.setSaloon(saloon);
-            saloonRepository.save(saloon);
-            barberRepository.save(barber);
-            return "Barber created successfully";
+        // Check if Barber already exists
+        if (barberRepository.existsById(barber.getId())) {
+            throw new AlreadyExistsException("Barber with ID " + barber.getId() + " already exists");
         }
+
+        // Find associated Saloon
+        Saloon saloon = saloonRepository.findById(barberReqDto.getSaloonId())
+                .orElseThrow(() -> new NotFoundException("Saloon with ID " + barberReqDto.getSaloonId() + " not found"));
+
+        // Associate Barber with Saloon
+        List<Barber> barbers = saloon.getBarbers();
+        barbers.add(barber);
+        saloon.setBarbers(barbers);
+
+        barber.setSaloon(saloon);
+
+        saloonRepository.save(saloon);
+        barberRepository.save(barber);
+
+        return "Barber created successfully";
     }
 
     public String updateBarber(BarberReqDto barberReqDto, Long id) {
+        // Check if Barber exists
+        Barber existingBarber = barberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Barber with ID " + id + " not found"));
 
-        Barber saved = barberRepository.findById(id).orElse(null);
-        if (saved == null) {
-            return "Barber not found";
-        }
-        else{
-            saved.setName(barberReqDto.getName());
+        // Update Barber details
+        existingBarber.setName(barberReqDto.getName());
+        barberRepository.save(existingBarber);
 
-
-
-            barberRepository.save(saved);
-            return "Barber updated successfully";
-        }
-
+        return "Barber updated successfully";
     }
 
-    public String deleteBarber(Long Id) {
-        Barber barber = barberRepository.findById(Id).orElse(null);
-        if (barber == null) {
-            return "Barber not found";
-        }
-        else {
-            barberRepository.delete(barber);
-            return "Barber deleted successfully";
-        }
+    public String deleteBarber(Long id) {
+        // Check if Barber exists
+        Barber barber = barberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Barber with ID " + id + " not found"));
+
+        barberRepository.delete(barber);
+
+        return "Barber deleted successfully";
     }
+
     public List<BarberResDto> getAllBarbers() {
         return barberRepository.findAll()
                 .stream()
@@ -129,11 +129,12 @@ public class BarberService {
     }
 
     public List<BarberResDto> getBarbersBySaloon(Long saloonId) {
-        return barberRepository.findBarbersBySaloon(saloonRepository.findById(saloonId).orElse(null))
+        Saloon saloon = saloonRepository.findById(saloonId)
+                .orElseThrow(() -> new NotFoundException("Saloon with ID " + saloonId + " not found"));
+
+        return barberRepository.findBarbersBySaloon(saloon)
                 .stream()
                 .map(barber -> modelMapper.map(barber, BarberResDto.class))
                 .collect(Collectors.toList());
     }
-
-
 }

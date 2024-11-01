@@ -1,6 +1,8 @@
 package com.example.project200.services;
 
 import com.example.project200.entities.Saloon;
+import com.example.project200.handlers.AlreadyExistsException;
+import com.example.project200.handlers.NotFoundException;
 import com.example.project200.repositories.SaloonRepository;
 import com.example.project200.requestDto.SaloonReqDto;
 import com.example.project200.responseDto.SaloonResDto;
@@ -19,58 +21,64 @@ public class SaloonService {
     private final ModelMapper modelMapper;
 
     public String createSaloon(SaloonReqDto saloonReqDto) {
+        // Check if a Saloon with the same name already exists
+        Saloon existingSaloon = saloonRepository.findByName(saloonReqDto.getName());
+        if (existingSaloon != null) {
+            throw new AlreadyExistsException("Saloon with name " + saloonReqDto.getName() + " already exists");
+        }
+
         Saloon saloon = modelMapper.map(saloonReqDto, Saloon.class);
-        Saloon saloonSaved = saloonRepository.findByName(saloon.getName());
-        if (saloonSaved != null) {
-            return "Saloon already exists";
-        }
-        else {
-            saloonRepository.save(saloon);
-            return "Saloon created";
-        }
+        saloonRepository.save(saloon);
+
+        return "Saloon created successfully";
     }
+
     public SaloonResDto getSaloonById(Long id) {
-        Saloon saloon = saloonRepository.findById(id).orElse(null);
+        // Retrieve Saloon by ID or throw NotFoundException if not found
+        Saloon saloon = saloonRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Saloon with ID " + id + " not found"));
+
         return modelMapper.map(saloon, SaloonResDto.class);
     }
+
     public List<SaloonResDto> getAllSaloons() {
         return saloonRepository.findAll()
                 .stream()
                 .map(saloon -> modelMapper.map(saloon, SaloonResDto.class))
                 .collect(Collectors.toList());
     }
-    public String updateSaloon(Long id, SaloonReqDto saloonReqDto) {
 
-        Saloon existedSaloon = saloonRepository.findById(id).orElse(null);
-        if (existedSaloon == null) {
-            return "Saloon does not exist";
-        } else {
-            existedSaloon.setName(saloonReqDto.getName());
-            existedSaloon.setLocation(saloonReqDto.getLocation());
-            existedSaloon.setStartTime(saloonReqDto.getStartTime());
-            existedSaloon.setEndTime(saloonReqDto.getEndTime());
-            saloonRepository.save(existedSaloon);
-            return "Saloon updated";
-        }
+    public String updateSaloon(Long id, SaloonReqDto saloonReqDto) {
+        // Check if the Saloon exists; if not, throw NotFoundException
+        Saloon existingSaloon = saloonRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Saloon with ID " + id + " does not exist"));
+
+        // Update the fields of the existing Saloon
+        existingSaloon.setName(saloonReqDto.getName());
+        existingSaloon.setLocation(saloonReqDto.getLocation());
+        existingSaloon.setStartTime(saloonReqDto.getStartTime());
+        existingSaloon.setEndTime(saloonReqDto.getEndTime());
+
+        saloonRepository.save(existingSaloon);
+
+        return "Saloon updated successfully";
     }
+
     public String deleteSaloon(Long id) {
-        Saloon saloon = saloonRepository.findById(id).orElse(null);
-        if (saloon == null) {
-            return "Saloon does not exist";
-        }
-        else {
-            saloonRepository.delete(saloon);
-            return "Saloon deleted";
-        }
+        // Check if the Saloon exists; if not, throw NotFoundException
+        Saloon saloon = saloonRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Saloon with ID " + id + " does not exist"));
+
+        saloonRepository.delete(saloon);
+        return "Saloon deleted successfully";
     }
+
     public List<SaloonResDto> getSaloonsByLocation(String location) {
         return saloonRepository.findByLocation(location)
                 .stream()
                 .map(saloon -> modelMapper.map(saloon, SaloonResDto.class))
                 .collect(Collectors.toList());
     }
-
-
 
 
 }

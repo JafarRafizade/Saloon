@@ -30,6 +30,11 @@ public class Barber {
     @OneToMany(mappedBy = "barber", cascade = CascadeType.PERSIST)
     private List<Serve> barberServices;
 
+    @ElementCollection
+    @CollectionTable(name = "barber_reservation_ids", joinColumns = @JoinColumn(name = "barber_id"))
+    @Column(name = "reservation_id")
+    private List<Long> reservationIds;
+
 
     private int onlineStatus;
 
