@@ -10,4 +10,5 @@ import java.util.List;
 public interface SaloonRepository extends JpaRepository<Saloon, Long> {
     Saloon findByName(String name);
     List<Saloon> findByLocation(String location);
+    Boolean existsByName(String name);
 }

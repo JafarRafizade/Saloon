@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface BarberRepository extends JpaRepository<Barber, Long> {
     List<Barber> findBarbersBySaloon(Saloon saloon);
+    Boolean existsByName(String name);
 }

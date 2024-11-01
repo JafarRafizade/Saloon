@@ -4,6 +4,7 @@ import com.example.project200.entities.Barber;
 import com.example.project200.entities.Saloon;
 import com.example.project200.entities.Serve;
 import com.example.project200.handlers.NotFoundException;
+import com.example.project200.handlers.UniqueFieldException;
 import com.example.project200.repositories.BarberRepository;
 import com.example.project200.repositories.SaloonRepository;
 import com.example.project200.repositories.ServeRepository;
@@ -35,6 +36,9 @@ public class ServeService {
                 .orElseThrow(() -> new NotFoundException("Barber with ID " + serveReqDto.getBarberId() + " not found"));
         Saloon saloon = saloonRepository.findById(serveReqDto.getSaloonId())
                 .orElseThrow(() -> new NotFoundException("Saloon with ID " + serveReqDto.getSaloonId() + " not found"));
+        if (serveRepository.existsByName(serveReqDto.getName())) {
+            throw new UniqueFieldException("Serve with name " + barber.getName() + " already exists");
+        }
 
         // Associate Serve with Saloon and Barber
         saloon.getBarberServices().add(serve);

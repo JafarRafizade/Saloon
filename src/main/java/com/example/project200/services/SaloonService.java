@@ -3,6 +3,7 @@ package com.example.project200.services;
 import com.example.project200.entities.Saloon;
 import com.example.project200.handlers.AlreadyExistsException;
 import com.example.project200.handlers.NotFoundException;
+import com.example.project200.handlers.UniqueFieldException;
 import com.example.project200.repositories.SaloonRepository;
 import com.example.project200.requestDto.SaloonReqDto;
 import com.example.project200.responseDto.SaloonResDto;
@@ -26,8 +27,11 @@ public class SaloonService {
         if (existingSaloon != null) {
             throw new AlreadyExistsException("Saloon with name " + saloonReqDto.getName() + " already exists");
         }
-
         Saloon saloon = modelMapper.map(saloonReqDto, Saloon.class);
+
+        if (saloonRepository.existsById(saloon.getId())) {
+            throw new AlreadyExistsException("Barber with ID " + saloon.getId() + " already exists");
+        }
         saloonRepository.save(saloon);
 
         return "Saloon created successfully";

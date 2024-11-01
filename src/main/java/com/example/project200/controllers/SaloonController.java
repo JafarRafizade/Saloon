@@ -25,6 +25,10 @@ public class SaloonController {
     public List<SaloonResDto> getSaloonsByLocation(@RequestParam String location) {
         return saloonService.getSaloonsByLocation(location);
     }
+    @GetMapping("/get-saloon-by-id")
+    public SaloonResDto getSaloonById(@RequestParam Long id) {
+        return saloonService.getSaloonById(id);
+    }
     @PutMapping("/update-saloon")
     public String updateSaloon(@RequestBody SaloonReqDto saloonReqDto, @RequestParam Long id) {
         return saloonService.updateSaloon(id, saloonReqDto);

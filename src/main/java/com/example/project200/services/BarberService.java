@@ -5,6 +5,7 @@ import com.example.project200.entities.Barber;
 import com.example.project200.entities.Saloon;
 import com.example.project200.handlers.AlreadyExistsException;
 import com.example.project200.handlers.NotFoundException;
+import com.example.project200.handlers.UniqueFieldException;
 import com.example.project200.repositories.ReservationRepository;
 import com.example.project200.repositories.BarberRepository;
 import com.example.project200.repositories.SaloonRepository;
@@ -81,6 +82,10 @@ public class BarberService {
         if (barberRepository.existsById(barber.getId())) {
             throw new AlreadyExistsException("Barber with ID " + barber.getId() + " already exists");
         }
+        if (barberRepository.existsByName(barberReqDto.getName())) {
+            throw new UniqueFieldException("Barber with name " + barber.getName() + " already exists");
+        }
+
 
         // Find associated Saloon
         Saloon saloon = saloonRepository.findById(barberReqDto.getSaloonId())

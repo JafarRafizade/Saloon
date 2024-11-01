@@ -11,5 +11,6 @@ public interface ServeRepository extends JpaRepository<com.example.project200.en
     Serve findByName(String name);
     List<Serve> findAllById(Iterable<Long> ids);
     List<Serve> findServesBySaloonId(Long saloonId);
+    Boolean existsByName(String name);
 
 }
