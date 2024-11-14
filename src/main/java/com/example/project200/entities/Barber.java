@@ -28,7 +28,7 @@ public class Barber {
     private Saloon saloon;
 
     @OneToMany(mappedBy = "barber", cascade = CascadeType.PERSIST)
-    private List<Serve> barberServices;
+    private List<Serve> serves;
 
     @ElementCollection
     @CollectionTable(name = "barber_reservation_ids", joinColumns = @JoinColumn(name = "barber_id"))

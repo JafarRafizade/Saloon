@@ -11,6 +11,6 @@ import java.util.List;
 @Getter
 public class ReservationReqDto {
     private Long barberId;
-    private List<Long> serviceIds;
+    private List<Long> serveIds;
     private LocalDateTime startTime;
 }

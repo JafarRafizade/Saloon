@@ -28,6 +28,6 @@ public class Saloon {
     private List<Barber> barbers;
 
     @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Serve> barberServices;
+    private List<Serve> serves;
 
 }

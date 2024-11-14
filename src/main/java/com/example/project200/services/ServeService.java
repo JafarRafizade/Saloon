@@ -41,17 +41,19 @@ public class ServeService {
         }
 
         // Associate Serve with Saloon and Barber
-        saloon.getBarberServices().add(serve);
-        barber.getBarberServices().add(serve);
+        serve.setBarber(barber);
+        serve.setSaloon(saloon);
+
+        serveRepository.save(serve);
+
+        saloon.getServes().add(serve);
+        barber.getServes().add(serve);
 
         saloonRepository.save(saloon);
         barberRepository.save(barber);
 
         // Set relationships manually in Serve entity
-        serve.setBarber(barber);
-        serve.setSaloon(saloon);
 
-        serveRepository.save(serve);
         return "Serve with name " + serveReqDto.getName() + " added";
     }
 

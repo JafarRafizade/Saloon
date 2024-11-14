@@ -29,6 +29,7 @@ public class ReservationService {
 
     public String addReservation(ReservationReqDto reservationReqDto) {
         Reservation reservation = modelMapper.map(reservationReqDto, Reservation.class);
+
         Barber barber = barberRepository.findById(reservationReqDto.getBarberId())
                 .orElseThrow(() -> new NotFoundException("Barber with ID " + reservationReqDto.getBarberId() + " not found"));
 
@@ -40,12 +41,10 @@ public class ReservationService {
 
         reservationRepository.save(reservation);
 
-        // Update barber's reservation list
-        List<Long> reservationIds = barber.getReservationIds();
-        reservationIds.add(reservation.getId());
-        barberRepository.save(barber);
+
 
         return "Reservation added";
+
     }
 
     public String acceptRequest(Long reservationId) {

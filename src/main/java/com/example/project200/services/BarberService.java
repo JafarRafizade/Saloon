@@ -79,9 +79,7 @@ public class BarberService {
         Barber barber = modelMapper.map(barberReqDto, Barber.class);
 
         // Check if Barber already exists
-        if (barberRepository.existsById(barber.getId())) {
-            throw new AlreadyExistsException("Barber with ID " + barber.getId() + " already exists");
-        }
+
         if (barberRepository.existsByName(barberReqDto.getName())) {
             throw new UniqueFieldException("Barber with name " + barber.getName() + " already exists");
         }

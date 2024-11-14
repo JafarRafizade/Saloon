@@ -29,9 +29,7 @@ public class SaloonService {
         }
         Saloon saloon = modelMapper.map(saloonReqDto, Saloon.class);
 
-        if (saloonRepository.existsById(saloon.getId())) {
-            throw new AlreadyExistsException("Barber with ID " + saloon.getId() + " already exists");
-        }
+
         saloonRepository.save(saloon);
 
         return "Saloon created successfully";
