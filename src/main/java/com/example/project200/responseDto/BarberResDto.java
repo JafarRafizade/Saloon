@@ -11,6 +11,8 @@ import java.util.List;
 public class BarberResDto {
     private Long id;
     private String name;
+    private Long phoneNumber;
+    private String email;
     private SaloonResDto saloon;
 
 }

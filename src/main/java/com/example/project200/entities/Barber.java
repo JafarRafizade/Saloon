@@ -18,7 +18,6 @@ public class Barber {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int age;
     private Long phoneNumber;
     private String email;
 
@@ -30,10 +29,8 @@ public class Barber {
     @OneToMany(mappedBy = "barber", cascade = CascadeType.PERSIST)
     private List<Serve> serves;
 
-    @ElementCollection
-    @CollectionTable(name = "barber_reservation_ids", joinColumns = @JoinColumn(name = "barber_id"))
-    @Column(name = "reservation_id")
-    private List<Long> reservationIds;
+    @OneToMany(mappedBy = "barber", cascade = CascadeType.PERSIST)
+    private List<Reservation> reservations;
 
 
     private int onlineStatus;

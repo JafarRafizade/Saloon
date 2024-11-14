@@ -21,7 +21,11 @@ public class Saloon {
 
     private String name;
     private String location;
+
+    @Column(name = "start_time")
     private LocalDateTime startTime;
+
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
     @OneToMany(mappedBy = "saloon", cascade = CascadeType.ALL, orphanRemoval = true)

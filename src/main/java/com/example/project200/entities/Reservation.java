@@ -20,14 +20,15 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long barberId;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "barber_id")
+    private Barber barber;
 
 
     @ElementCollection
     @CollectionTable(name = "reservation_serve_ids", joinColumns = @JoinColumn(name = "reservation_id"))
     @Column(name = "serve_id")
     private List<Long> serveIds;
-
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 

@@ -40,8 +40,8 @@ public class ReservationService {
         reservation.setEndTime(reservation.getStartTime().plusMinutes(totalDuration));
 
         reservationRepository.save(reservation);
-
-
+        barber.getReservations().add(reservation);
+        barberRepository.save(barber);
 
         return "Reservation added";
 
