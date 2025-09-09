@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -16,46 +17,27 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice
+
+@RestControllerAdvice(annotations = RestController.class)
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // Handle NotFoundException
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                "Resource Not Found",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ErrorMessage> handleNotFound(NotFoundException ex, WebRequest request) {
+        ErrorMessage errorMessage = new ErrorMessage(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
-    // Handle AlreadyExistsException
     @ExceptionHandler(AlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleAlreadyExists(AlreadyExistsException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                "Conflict - Resource Already Exists",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    public ResponseEntity<ErrorMessage> handleAlreadyExists(AlreadyExistsException ex,WebRequest request){
+        ErrorMessage errorMessage=new ErrorMessage(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
     }
 
-    // Handle UniqueFieldException
     @ExceptionHandler(UniqueFieldException.class)
-    public ResponseEntity<ErrorResponse> handleUniqueField(UniqueFieldException ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request - Unique Field Violation",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> handleUniqueField(UniqueFieldException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    // Handle MethodArgumentNotValidException (for validation errors)
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, @NonNull WebRequest request) {
         Map<String, String> errors = new HashMap<>();
@@ -65,15 +47,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    // Handle other uncaught exceptions
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorMessage> handleUnauthorized(UnauthorizedException ex,WebRequest request){
+        ErrorMessage errorMessage=new ErrorMessage(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorMessage);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorMessage> handleIllegalArgument(IllegalArgumentException ex, WebRequest request){
+        ErrorMessage errorMessage=new ErrorMessage(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.CREATED).body(errorMessage);
+    }
+
 }

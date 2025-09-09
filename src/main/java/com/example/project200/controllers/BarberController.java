@@ -1,10 +1,14 @@
 package com.example.project200.controllers;
 
-import com.example.project200.requestDto.BarberReqDto;
+import com.example.project200.requestDto.BarberCreateReqDto;
+import com.example.project200.requestDto.BarberUpdateReqDto;
 import com.example.project200.responseDto.BarberResDto;
-import com.example.project200.services.BarberService;
+import com.example.project200.responseDto.PaginationResDto;
+import com.example.project200.services.BarberServiceImpl;
+import com.example.project200.services.serviceInterfaces.BarberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,28 +18,73 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BarberController {
     private final BarberService barberService;
-    @PostMapping("/create-barber")
-    public String createBarber(@RequestBody BarberReqDto barberReqDto) {
-        return barberService.createBarber(barberReqDto);
+    @PostMapping("add")
+    public ResponseEntity<String> addBarber(@Valid @RequestBody BarberCreateReqDto barberCreateReqDto){
+        return ResponseEntity.ok(barberService.addBarber(barberCreateReqDto));
     }
 
-    @GetMapping("/get-all-barbers")
-    public List<BarberResDto> getAllBarbers() {
-        return barberService.getAllBarbers();
+    @PutMapping("update")
+    public ResponseEntity<String> updateBarber(@RequestParam Long id, @Valid @RequestBody BarberUpdateReqDto barberUpdateReqDto, @RequestHeader("X-Authenticated-User-ID")String token){
+        return ResponseEntity.ok(barberService.updateBarber(id,barberUpdateReqDto,token));
+    }
 
+
+    @DeleteMapping("delete")
+    public ResponseEntity<String> deleteBarber(@RequestParam Long id, @RequestHeader("X-Authenticated-User-ID")String token){
+        return ResponseEntity.ok(barberService.deleteBarber(id,token));
     }
-    @GetMapping("/get-barbers-by-saloon")
-    public List<BarberResDto> getBarbersBySaloon(@RequestParam Long saloonId) {
-        return barberService.getBarbersBySaloon(saloonId);
+
+
+    @GetMapping("all")
+    public ResponseEntity<List<BarberResDto>> getAllBarbers(){
+        return ResponseEntity.ok(barberService.getAllBarber());
     }
-    @PutMapping("/update-barber")
-    public String updateBarber(@RequestBody BarberReqDto barberReqDto, @RequestParam Long Id) {
-        return barberService.updateBarber(barberReqDto, Id);
+
+
+    @GetMapping("byId")
+    public ResponseEntity<BarberResDto> getBarberById(@RequestParam Long id){
+        return ResponseEntity.ok(barberService.getBarberById(id));
     }
-    @DeleteMapping("/delete-barber")
-    public String deleteBarber(@RequestParam Long id) {
-        return barberService.deleteBarber(id);
+
+
+    @GetMapping("firstName")
+    public ResponseEntity<List<BarberResDto>> getBarberByFirstName(@RequestParam String firstName){
+        return ResponseEntity.ok(barberService.getBarberByFirstName(firstName));
     }
+
+
+    @GetMapping("lastName")
+    public ResponseEntity<List<BarberResDto>> getBarberByLastName(@RequestParam String lastName){
+        return ResponseEntity.ok(barberService.getBarberByLastName(lastName));
+    }
+    @GetMapping("byBarberShop")
+    public ResponseEntity<List<BarberResDto>> getBarbersBySaloon(@RequestParam Long id){
+        return ResponseEntity.ok(barberService.getBarberByBarberShop(id));
+    }
+
+
+    @GetMapping("onlineStatus")
+    public ResponseEntity<String> getOnlineStatus(@RequestParam Long id){
+        return ResponseEntity.ok(barberService.getOnlineStatus(id));
+    }
+
+
+    @PutMapping("updateStatus")
+    public ResponseEntity<String> updateStatus(@RequestParam Long id, @RequestParam Integer newStatus, @RequestHeader("X-Authenticated-User-ID")String token){
+        return ResponseEntity.ok(barberService.updateStatus(id,newStatus,token));
+    }
+
+
+    @GetMapping("online")
+    public ResponseEntity<PaginationResDto> getBarberByOnline(@RequestParam int page, @RequestParam int size){
+        return ResponseEntity.ok(barberService.getBarberByOnline(page,size));
+    }
+
+    @GetMapping("search")
+    public ResponseEntity<PaginationResDto> searchEngine(@RequestParam String engine,@RequestParam int page, @RequestParam int size){
+        return ResponseEntity.ok(barberService.searchEngine(engine,page,size));
+    }
+
 
 
 }
